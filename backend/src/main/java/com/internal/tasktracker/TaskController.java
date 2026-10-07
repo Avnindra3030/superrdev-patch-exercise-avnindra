@@ -3,7 +3,10 @@ package com.internal.tasktracker;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -22,12 +25,20 @@ public class TaskController {
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int pageSize) {
 
-        // Validate pagination input.
-        if (page < 1 || pageSize < 1 || pageSize > 100) {
+        // Validate pagination parameters.
+        if (page < 1) {
             return ResponseEntity.badRequest()
                     .body(Map.of(
                             "error", "Invalid pagination parameters",
-                            "message", "page must be >= 1 and pageSize must be between 1 and 100"
+                            "message", "page must be greater than or equal to 1"
+                    ));
+        }
+
+        if (pageSize < 1 || pageSize > 100) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of(
+                            "error", "Invalid pagination parameters",
+                            "message", "pageSize must be between 1 and 100"
                     ));
         }
 
@@ -38,9 +49,10 @@ public class TaskController {
         // Parse and validate status filter.
         String normalizedStatus = null;
 
-        if (status != null && !status.isBlank()) {
+        if (status != null && !status.trim().isEmpty()) {
             try {
-                normalizedStatus = TaskStatus.valueOf(status.toUpperCase()).name();
+                normalizedStatus =
+                        TaskStatus.valueOf(status.trim().toUpperCase()).name();
             } catch (IllegalArgumentException e) {
                 return ResponseEntity.badRequest()
                         .body(Map.of(
@@ -50,17 +62,30 @@ public class TaskController {
             }
         }
 
-        System.out.println("[TaskController] q=\"" + query + "\" status="
-                + normalizedStatus + " page=" + page + " pageSize=" + pageSize);
+        // Keep request logging lightweight; do not block the request thread.
+        System.out.println(
+                "[TaskController] q=\"" + query +
+                "\" status=" + normalizedStatus +
+                " page=" + page +
+                " pageSize=" + pageSize
+        );
 
-        List<Task> allResults = taskRepository.searchTasks(searchTerm, normalizedStatus);
+        List<Task> allResults =
+                taskRepository.searchTasks(searchTerm, normalizedStatus);
 
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, allResults.size());
+        // Calculate pagination safely.
+        long start = (long) (page - 1) * pageSize;
 
-        List<Task> pageResults = (start < allResults.size())
-                ? allResults.subList(start, end)
-                : Collections.emptyList();
+        List<Task> pageResults;
+
+        if (start >= allResults.size()) {
+            pageResults = Collections.emptyList();
+        } else {
+            int startIndex = (int) start;
+            int endIndex = Math.min(startIndex + pageSize, allResults.size());
+
+            pageResults = allResults.subList(startIndex, endIndex);
+        }
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("items", pageResults);
