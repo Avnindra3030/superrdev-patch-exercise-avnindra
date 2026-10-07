@@ -7,45 +7,22 @@ export function useTasks(query, status, page, pageSize) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let cancelled = false;
+ useEffect(() => {
+  setLoading(true);
+  setError(null);
 
-    setLoading(true);
-    setError(null);
-
-    fetchTasks({
-      query,
-      status,
-      page,
-      pageSize
+  fetchTasks({ query, status, page, pageSize })
+    .then((data) => {
+      setTasks(data.items);
+      setTotal(data.total);
     })
-      .then((data) => {
-        if (cancelled) {
-          return;
-        }
-
-        setTasks(data.items || []);
-        setTotal(data.total || 0);
-      })
-      .catch((err) => {
-        if (cancelled) {
-          return;
-        }
-
-        setTasks([]);
-        setTotal(0);
-        setError(err?.message || 'Failed to load tasks');
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [query, status, page, pageSize]);
+    .catch((err) => {
+      setError(err.message);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+}, [query, status, page, pageSize]);
 
   return {
     tasks,
