@@ -9,14 +9,16 @@ export default function App() {
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
 
+  const pageSize = 10;
+
   const { tasks, total, loading, error } = useTasks(
     query,
     status,
     page,
-    10
+    pageSize
   );
 
-  const totalPages = Math.ceil(total / 10);
+  const totalPages = Math.ceil(total / pageSize);
 
   const handleSearchChange = (value) => {
     setQuery(value);
@@ -57,7 +59,7 @@ export default function App() {
         <div className="pagination">
           <button
             disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => setPage((currentPage) => currentPage - 1)}
           >
             Previous
           </button>
@@ -68,7 +70,7 @@ export default function App() {
 
           <button
             disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => setPage((currentPage) => currentPage + 1)}
           >
             Next
           </button>
