@@ -1,25 +1,17 @@
-# Patch Notes
+# Notes
 
-## Summary of changes
+## Summary of Changes
 
-I focused on correctness, request reliability, and defensive API handling.
+I focused on the highest-value issues around task filtering, status validation, and pagination. I added validation for `page` and `pageSize`, improved status-filter handling, and ensured search, status, and pagination parameters are passed consistently between the React frontend and Spring Boot API. I also verified the behavior through direct API requests and the browser UI.
 
-- Fixed the task search SQL so archived records are excluded consistently and the status filter applies to both title and description matches.
-- Removed an artificial Thread.sleep() from the request path that added unnecessary latency and blocked the request thread.
-- Added validation for page, pageSize, and status so invalid client input returns HTTP 400 instead of causing incorrect results or server errors.
-- Improved the frontend task hook so loading is cleared on both success and failure, previous errors are cleared, and stale requests cannot overwrite newer results.
-- Reset pagination to page 1 whenever the search query or status filter changes.
+## What I Chose Not to Change
 
-## What I chose not to change
+I intentionally avoided broad UI redesigns, large refactors, and unrelated code-quality changes. The exercise is time-boxed, so I prioritized correctness and API behavior over cosmetic improvements.
 
-I did not redesign the UI or rewrite pagination because those changes were outside the highest-value fixes for this time-boxed exercise.
+## Biggest Remaining Risk
 
-I also did not update npm dependencies or modify the Oracle reference artifact because they were not necessary for the core functional issues I prioritized.
+The biggest remaining risk is the limited automated test coverage around combinations of search, status filtering, pagination boundaries, and invalid input. These cases should ideally be covered with backend integration tests and frontend tests.
 
-## Biggest remaining risk
+## Tools / AI Used
 
-The backend loads all matching tasks into memory and then applies pagination. This could become inefficient with a much larger dataset. A database-level paginated query would be preferable in production.
-
-## AI/tool usage
-
-I used ChatGPT to inspect the code, reason about possible bugs, and suggest focused fixes. I reproduced the relevant behavior locally, reviewed the changes, and verified the corrected API and frontend behavior before keeping the changes.
+I used ChatGPT to help inspect the code, reason about possible bugs, and validate implementation approaches. I reviewed the suggestions, tested the behavior locally, and made/verified the final code changes myself. I also used PowerShell, curl, Git, and the browser developer tools for debugging and verification.
