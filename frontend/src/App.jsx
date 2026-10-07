@@ -39,20 +39,14 @@ export default function App() {
 
       <div className="controls">
         <SearchBar
-         value={query}
-         onChange={(value) => {
-        setQuery(value);
-        setPage(1);
-  }}
-/>
+          value={query}
+          onChange={handleSearchChange}
+        />
 
-<StatusFilter
-  value={status}
-  onChange={(value) => {
-    setStatus(value);
-    setPage(1);
-  }}
-/>
+        <StatusFilter
+          value={status}
+          onChange={handleStatusChange}
+        />
       </div>
 
       <TaskTable
