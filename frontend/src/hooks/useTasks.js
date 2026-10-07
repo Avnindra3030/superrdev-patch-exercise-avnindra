@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchTasks } from '../api';
 
 export function useTasks(query, status, page, pageSize) {
@@ -20,17 +20,21 @@ export function useTasks(query, status, page, pageSize) {
       pageSize
     })
       .then((data) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         setTasks(data.items || []);
         setTotal(data.total || 0);
       })
       .catch((err) => {
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
-        setError(err.message);
         setTasks([]);
         setTotal(0);
+        setError(err?.message || 'Failed to load tasks');
       })
       .finally(() => {
         if (!cancelled) {
