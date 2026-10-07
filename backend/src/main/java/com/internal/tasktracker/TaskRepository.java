@@ -23,3 +23,4 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         @Param("status") String status
     );
 }
+
